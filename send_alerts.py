@@ -58,6 +58,8 @@ def render_big_money_watchlist():
             "price": 127.53,
             "volume": 32100000,
             "rsi": 45,
+            "macd": 1.32,
+            "ema_50": 126.87,
             "note": "Scalp opportunity",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -72,6 +74,8 @@ def render_big_money_watchlist():
             "price": 256.12,
             "volume": 28900000,
             "rsi": 61,
+            "macd": -0.56,
+            "ema_50": 259.41,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
             "spoof_confidence": 0.83,
@@ -85,6 +89,8 @@ def render_big_money_watchlist():
             "price": 189.22,
             "volume": 35400000,
             "rsi": 52,
+            "macd": 0.12,
+            "ema_50": 188.95,
             "note": "Neutral, monitor only",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -117,11 +123,19 @@ def render_big_money_watchlist():
             spoof_info += "\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
             log_spoofing_event(row['ticker'], row['spoof_confidence'])
 
+        indicators_used = (
+            f"🧪 Indicators:\n"
+            f"• RSI: {row['rsi']}\n"
+            f"• MACD: {row['macd']}\n"
+            f"• EMA-50: {row['ema_50']}"
+        )
+
         desc = (
             f"💬 Reason: {row['reason']}\n"
             f"💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n"
             f"📊 Indicator Confidence: {row['indicator_score'] * 100:.0f}%\n"
-            f"📝 Note: {row['note']}{spoof_info}"
+            f"📝 Note: {row['note']}{spoof_info}\n"
+            f"{indicators_used}"
         )
 
         if row["action"] == "Buy":
