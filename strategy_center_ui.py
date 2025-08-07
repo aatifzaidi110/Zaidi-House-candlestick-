@@ -85,28 +85,34 @@ def render_strategy_center():
             st.info(f"📊 Historical Win Rate for {detected_signal}: {win_rate}%")
 
             # === Historical Chart + Indicators ===
-            try:
-                df = yf.Ticker(ticker).history(period="5d", interval="15m")
-                if not df.empty:
-                    df["EMA50"] = df["Close"].ewm(span=50).mean()
-                    df["VWAP"] = (df["Volume"] * (df["High"] + df["Low"] + df["Close"]) / 3).cumsum() / df["Volume"].cumsum()
+            # === Historical Chart + Indicators ===
+if mpf_available:
+    try:
+        df = yf.Ticker(ticker).history(period="5d", interval="15m")
+        if not df.empty:
+            df["EMA50"] = df["Close"].ewm(span=50).mean()
+            df["VWAP"] = (df["Volume"] * (df["High"] + df["Low"] + df["Close"]) / 3).cumsum() / df["Volume"].cumsum()
 
-                    apds = [
-                        mpf.make_addplot(df["EMA50"], color="blue", width=1),
-                        mpf.make_addplot(df["VWAP"], color="orange", width=1)
-                    ]
+            apds = [
+                mpf.make_addplot(df["EMA50"], color="blue", width=1),
+                mpf.make_addplot(df["VWAP"], color="orange", width=1)
+            ]
 
-                    st.subheader("📈 Historical Chart with EMA & VWAP")
-                    fig, ax = mpf.plot(df, type="candle", style="yahoo", addplot=apds, volume=True, returnfig=True)
-                    st.pyplot(fig)
+            st.subheader("📈 Historical Chart with EMA & VWAP")
+            fig, ax = mpf.plot(df, type="candle", style="yahoo", addplot=apds, volume=True, returnfig=True)
+            st.pyplot(fig)
 
-                    # Candlestick pattern detection
-                    patterns = detect_candlestick_patterns(df)
-                    if patterns:
-                        st.warning(f"🕯️ Detected Candlestick Pattern(s): {', '.join(patterns)}")
-                        st.caption("Pattern-based suggestion: Confirm with volume or MACD alignment.")
-            except Exception as e:
-                st.warning(f"⚠️ Could not render chart or patterns: {e}")
+            if ta_available:
+                patterns = detect_candlestick_patterns(df)
+                if patterns:
+                    st.warning(f"🕯️ Detected Candlestick Pattern(s): {', '.join(patterns)}")
+                    st.caption("Pattern-based suggestion: Confirm with volume or MACD alignment.")
+            else:
+                st.info("ℹ️ Candlestick pattern detection not available. Install `pandas-ta` to enable.")
+    except Exception as e:
+        st.warning(f"⚠️ Could not render chart or patterns: {e}")
+else:
+    st.warning("⚠️ `mplfinance` not installed. Skipping candlestick chart rendering.")
 
             # Display active indicators used
             st.markdown("---")
