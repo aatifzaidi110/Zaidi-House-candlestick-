@@ -18,3 +18,7 @@ python-dotenv
 pdfkit
 reportlab
 sec-edgar-downloader
+# Email/SMS Alerts
+smtplib
+email
+numpy
