@@ -33,3 +33,24 @@ def send_sms_alert(ticker, message):
 def send_email_alert_with_condition(ticker, message, institution_value, enable_alerts=True):
     if enable_alerts and institution_value > 2_000_000:
         send_email_alert(ticker, message)
+
+
+# === Big Money Watchlist Tab ===
+def render_big_money_watchlist():
+    import streamlit as st
+
+    st.markdown("## 📈 Big Money Watchlist")
+
+    data = [
+        {"ticker": "NVDA", "action": "Buy", "institution": "BlackRock", "value": 9_200_000},
+        {"ticker": "TSLA", "action": "Sell", "institution": "Citadel", "shares": 1_100_000},
+        {"ticker": "AAPL", "action": "Hold", "institution": "Vanguard"}
+    ]
+
+    for row in data:
+        if row["action"] == "Buy":
+            st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}")
+        elif row["action"] == "Sell":
+            st.error(f"🔴 {row['ticker']} — {row['institution']} sold {row['shares']:,} shares")
+        else:
+            st.warning(f"🟡 {row['ticker']} — {row['institution']} unchanged")
