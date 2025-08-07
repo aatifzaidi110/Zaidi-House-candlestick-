@@ -4,6 +4,7 @@ yfinance
 pandas
 requests
 pandas-ta
+mplfinance
 # === Optional / recommended for expansion ===
 matplotlib
 plotly
