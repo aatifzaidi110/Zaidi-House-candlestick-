@@ -2,7 +2,11 @@
 
 import streamlit as st
 import yfinance as yf
-import mplfinance as mpf
+try:
+    import mplfinance as mpf
+    mpf_available = True
+except ImportError:
+    mpf_available = False
 import matplotlib.pyplot as plt
 from strategy_engine import generate_strategy
 from indicator_calculator import compute_indicators
@@ -43,7 +47,7 @@ def render_strategy_center():
                 st.success(f"📈 Current Price: ${price}")
             else:
                 st.warning("⚠️ No price data available.")
-        except Exception as e:
+                        except Exception as e:
             st.error(f"Error fetching price: {e}")
 
     if st.button("🔍 Analyze Ticker"):
@@ -86,7 +90,8 @@ def render_strategy_center():
             st.info(f"📊 Historical Win Rate for {detected_signal}: {win_rate}%")
 
             # === Historical Chart + Indicators ===
-            try:
+            if mpf_available:
+                try:
                 df = yf.Ticker(ticker).history(period="5d", interval="15m")
                 if not df.empty:
                     df["EMA50"] = df["Close"].ewm(span=50).mean()
@@ -109,7 +114,9 @@ def render_strategy_center():
                     else:
                         st.info("ℹ️ Candlestick pattern detection not available. Install `pandas-ta` to enable.")
             except Exception as e:
-                st.warning(f"⚠️ Could not render chart or patterns: {e}")
+                    st.warning(f"⚠️ Could not render chart or patterns: {e}")
+            else:
+                st.warning("⚠️ `mplfinance` not installed. Skipping candlestick chart rendering.")
 
             # Display active indicators used
             st.markdown("---")
