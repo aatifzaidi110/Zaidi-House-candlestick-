@@ -59,7 +59,12 @@ def render_big_money_watchlist():
             "volume": 32100000,
             "rsi": 45,
             "macd": 1.32,
+            "macd_hist": 0.82,
             "ema_50": 126.87,
+            "ema_9": 126.05,
+            "ema_20": 126.55,
+            "obv": 12_340_000,
+            "bb_width": 2.1,
             "note": "Scalp opportunity",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -75,7 +80,12 @@ def render_big_money_watchlist():
             "volume": 28900000,
             "rsi": 61,
             "macd": -0.56,
+            "macd_hist": -0.22,
             "ema_50": 259.41,
+            "ema_9": 257.20,
+            "ema_20": 258.05,
+            "obv": -1_800_000,
+            "bb_width": 3.5,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
             "spoof_confidence": 0.83,
@@ -90,7 +100,12 @@ def render_big_money_watchlist():
             "volume": 35400000,
             "rsi": 52,
             "macd": 0.12,
+            "macd_hist": 0.08,
             "ema_50": 188.95,
+            "ema_9": 189.30,
+            "ema_20": 189.10,
+            "obv": 800_000,
+            "bb_width": 1.6,
             "note": "Neutral, monitor only",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -115,7 +130,6 @@ def render_big_money_watchlist():
 
     for _, row in filtered_df.iterrows():
         spoof_info = ""
-        next_step = ""
 
         if row["spoofing"]:
             spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
@@ -125,9 +139,13 @@ def render_big_money_watchlist():
 
         indicators_used = (
             f"🧪 Indicators:\n"
+            f"• Price > EMA 9: {row['price'] > row['ema_9']}\n"
+            f"• Price > EMA 20: {row['price'] > row['ema_20']}\n"
             f"• RSI: {row['rsi']}\n"
             f"• MACD: {row['macd']}\n"
-            f"• EMA-50: {row['ema_50']}"
+            f"• MACD Histogram: {row['macd_hist']}\n"
+            f"• OBV: {row['obv']}\n"
+            f"• BB Width: {row['bb_width']:.2f}"
         )
 
         desc = (
