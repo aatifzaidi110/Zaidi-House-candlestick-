@@ -5,8 +5,6 @@ from email.message import EmailMessage
 import streamlit as st
 import pandas as pd
 import datetime
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 
 # === Email Alert ===
 def send_email_alert(ticker, message):
@@ -46,12 +44,6 @@ def log_spoofing_event(ticker, confidence):
         f.write(f"{datetime.datetime.now()}, {ticker}, {confidence}\n")
 
 
-# === Entry/Exit Logging ===
-def log_trade_signal(ticker, entry, target, stop, confidence):
-    with open("trade_signals_log.csv", "a") as f:
-        f.write(f"{datetime.datetime.now()},{ticker},{entry},{target},{stop},{confidence}\n")
-
-
 # === Big Money Watchlist Tab ===
 def render_big_money_watchlist():
     st.markdown("## 📈 Big Money Watchlist")
@@ -68,17 +60,14 @@ def render_big_money_watchlist():
             "rsi": 45,
             "macd": 1.32,
             "ema_50": 126.87,
-            "iv": 32,
-            "oi": 1_200_000,
-            "obv": 500_000,
-            "bb_position": 0.6,
+            "iv": 42.1,
+            "oi": 155000,
+            "obv": 2.5,
+            "bb_pos": 0.87,
             "note": "Scalp opportunity",
             "spoofing": False,
             "spoof_confidence": 0.0,
-            "indicator_score": 0.85,
-            "entry": 127.0,
-            "target": 132.0,
-            "stop": 125.5
+            "indicator_score": 0.85
         },
         {
             "ticker": "TSLA",
@@ -88,25 +77,42 @@ def render_big_money_watchlist():
             "reason": "Profit booking",
             "price": 256.12,
             "volume": 28900000,
-            "rsi": 61,
+            "rsi": 71,
             "macd": -0.56,
             "ema_50": 259.41,
-            "iv": 50,
-            "oi": 900_000,
-            "obv": -100_000,
-            "bb_position": 0.9,
+            "iv": 85.7,
+            "oi": 84000,
+            "obv": -1.8,
+            "bb_pos": 0.94,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
             "spoof_confidence": 0.83,
-            "indicator_score": 0.65,
-            "entry": 254.5,
-            "target": 245.0,
-            "stop": 261.0
+            "indicator_score": 0.65
+        },
+        {
+            "ticker": "AAPL",
+            "action": "Hold",
+            "institution": "Vanguard",
+            "reason": "No major movement",
+            "price": 189.22,
+            "volume": 35400000,
+            "rsi": 52,
+            "macd": 0.12,
+            "ema_50": 188.95,
+            "iv": 29.4,
+            "oi": 62000,
+            "obv": 0.9,
+            "bb_pos": 0.50,
+            "note": "Neutral, monitor only",
+            "spoofing": False,
+            "spoof_confidence": 0.0,
+            "indicator_score": 0.55
         }
     ]
 
     df = pd.DataFrame(data)
 
+    # Filter and sort UI
     action_filter = st.multiselect("Filter by Action", options=["Buy", "Sell", "Hold"], default=["Buy", "Sell", "Hold"])
     spoof_filter = st.checkbox("Only Show Spoofing Detected", value=False)
     confidence_threshold = st.slider("Minimum Indicator Confidence (%)", 0, 100, 70)
@@ -121,20 +127,23 @@ def render_big_money_watchlist():
 
     for _, row in filtered_df.iterrows():
         spoof_info = ""
+        next_step = ""
+
         if row["spoofing"]:
-            spoof_info += f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
+            spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
             spoof_info += "\n⚠️ Note: Spoofing suspected, wait for confirmation"
             spoof_info += "\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
             log_spoofing_event(row['ticker'], row['spoof_confidence'])
 
         indicators_used = (
-            f"🧪 Indicators:\n"
-            f"• RSI: {row['rsi']} (⚠️ >70 = Overbought, <30 = Oversold)\n"
-            f"• MACD: {row['macd']} (📈 Rising = Bullish)\n"
-            f"• EMA-50: {row['ema_50']}\n"
-            f"• IV: {row['iv']} (⚠️ High IV = Risky options)\n"
-            f"• OI: {row['oi']} (📊 High OI = Institutional Interest)\n"
-            f"• BB Pos: {row['bb_position']} (0.5 = middle, >0.9 = breakout zone)"
+            f"🧪 Indicators (with thresholds):\n"
+            f"• RSI: {row['rsi']} (✔️ if <70, ⚠️ if >70)\n"
+            f"• MACD: {row['macd']} (✔️ if positive)\n"
+            f"• EMA-50: {row['ema_50']} (✔️ if price > EMA)\n"
+            f"• IV: {row['iv']}% (⚠️ if very high = expensive options)\n"
+            f"• OI: {row['oi']} (✔️ if high = participation)\n"
+            f"• OBV: {row['obv']} (✔️ if rising = confirmation)\n"
+            f"• BB Pos: {row['bb_pos']} (✔️ near 1 = breakout zone)"
         )
 
         desc = (
@@ -142,23 +151,8 @@ def render_big_money_watchlist():
             f"💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n"
             f"📊 Indicator Confidence: {row['indicator_score'] * 100:.0f}%\n"
             f"📝 Note: {row['note']}{spoof_info}\n"
-            f"{indicators_used}\n\n"
-            f"🎯 Trade Planner: Entry ${row['entry']}, Target ${row['target']}, Stop ${row['stop']}"
+            f"{indicators_used}"
         )
-
-        log_trade_signal(row['ticker'], row['entry'], row['target'], row['stop'], row['indicator_score'])
-
-        radar = go.Figure()
-        radar.add_trace(go.Barpolar(
-            r=[row['rsi'], row['macd'], row['iv'], row['oi'], row['bb_position'] * 100],
-            theta=['RSI', 'MACD', 'IV', 'OI', 'BB Pos'],
-            marker_color=['blue', 'orange', 'purple', 'green', 'red'],
-            marker_line_color="black",
-            marker_line_width=1.5,
-            opacity=0.8
-        ))
-        radar.update_layout(title=f"📊 Confidence Breakdown: {row['ticker']}", polar=dict(radialaxis=dict(visible=True)))
-        st.plotly_chart(radar, use_container_width=True)
 
         if row["action"] == "Buy":
             st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}\n{desc}")
