@@ -42,15 +42,46 @@ def render_big_money_watchlist():
     st.markdown("## 📈 Big Money Watchlist")
 
     data = [
-        {"ticker": "NVDA", "action": "Buy", "institution": "BlackRock", "value": 9_200_000},
-        {"ticker": "TSLA", "action": "Sell", "institution": "Citadel", "shares": 1_100_000},
-        {"ticker": "AAPL", "action": "Hold", "institution": "Vanguard"}
+        {
+            "ticker": "NVDA",
+            "action": "Buy",
+            "institution": "BlackRock",
+            "value": 9_200_000,
+            "reason": "13F institutional buy",
+            "price": 127.53,
+            "volume": 32100000,
+            "rsi": 45,
+            "note": "Scalp opportunity"
+        },
+        {
+            "ticker": "TSLA",
+            "action": "Sell",
+            "institution": "Citadel",
+            "shares": 1_100_000,
+            "reason": "Profit booking",
+            "price": 256.12,
+            "volume": 28900000,
+            "rsi": 61,
+            "note": "Spoofing suspected, wait for confirmation"
+        },
+        {
+            "ticker": "AAPL",
+            "action": "Hold",
+            "institution": "Vanguard",
+            "reason": "No major movement",
+            "price": 189.22,
+            "volume": 35400000,
+            "rsi": 52,
+            "note": "Neutral, monitor only"
+        }
     ]
 
     for row in data:
+        desc = f"💬 Reason: {row['reason']}\n💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n📝 Note: {row['note']}"
+
         if row["action"] == "Buy":
-            st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}")
+            st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}\n{desc}")
         elif row["action"] == "Sell":
-            st.error(f"🔴 {row['ticker']} — {row['institution']} sold {row['shares']:,} shares")
+            st.error(f"🔴 {row['ticker']} — {row['institution']} sold {row['shares']:,} shares\n{desc}")
         else:
-            st.warning(f"🟡 {row['ticker']} — {row['institution']} unchanged")
+            st.warning(f"🟡 {row['ticker']} — {row['institution']} unchanged\n{desc}")
