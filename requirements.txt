@@ -21,3 +21,4 @@ sec-edgar-downloader
 # Email/SMS Alerts
 numpy
 rich
+twilio
