@@ -19,6 +19,5 @@ pdfkit
 reportlab
 sec-edgar-downloader
 # Email/SMS Alerts
-email
 numpy
 rich
