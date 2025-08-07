@@ -2,6 +2,9 @@
 
 import smtplib
 from email.message import EmailMessage
+import streamlit as st
+import pandas as pd
+import datetime
 
 # === Email Alert ===
 def send_email_alert(ticker, message):
@@ -35,11 +38,14 @@ def send_email_alert_with_condition(ticker, message, institution_value, enable_a
         send_email_alert(ticker, message)
 
 
+# === Spoofing Alert Logger ===
+def log_spoofing_event(ticker, confidence):
+    with open("spoofing_log.csv", "a") as f:
+        f.write(f"{datetime.datetime.now()}, {ticker}, {confidence}\n")
+
+
 # === Big Money Watchlist Tab ===
 def render_big_money_watchlist():
-    import streamlit as st
-    import pandas as pd
-
     st.markdown("## 📈 Big Money Watchlist")
 
     data = [
@@ -97,8 +103,20 @@ def render_big_money_watchlist():
     filtered_df = filtered_df.sort_values(by=sort_option, ascending=sort_asc)
 
     for _, row in filtered_df.iterrows():
-        spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%" if row["spoofing"] else ""
-        desc = f"💬 Reason: {row['reason']}\n💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n📝 Note: {row['note']}{spoof_info}"
+        spoof_info = ""
+        next_step = ""
+
+        if row["spoofing"]:
+            spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
+            spoof_info += "\n⚠️ Note: Spoofing suspected, wait for confirmation"
+            spoof_info += f"\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
+            log_spoofing_event(row['ticker'], row['spoof_confidence'])
+
+        desc = (
+            f"💬 Reason: {row['reason']}\n"
+            f"💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n"
+            f"📝 Note: {row['note']}{spoof_info}"
+        )
 
         if row["action"] == "Buy":
             st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}\n{desc}")
@@ -106,3 +124,15 @@ def render_big_money_watchlist():
             st.error(f"🔴 {row['ticker']} — {row['institution']} sold {row['shares']:,} shares\n{desc}")
         else:
             st.warning(f"🟡 {row['ticker']} — {row['institution']} unchanged\n{desc}")
+
+
+# === Spoofing History Tab ===
+def render_spoofing_log():
+    st.markdown("## 📜 Spoofing Alert History")
+    try:
+        df = pd.read_csv("spoofing_log.csv", names=["Time", "Ticker", "Confidence"])
+        df["Time"] = pd.to_datetime(df["Time"])
+        df = df.sort_values(by="Time", ascending=False)
+        st.dataframe(df)
+    except FileNotFoundError:
+        st.info("No spoofing alerts logged yet.")
