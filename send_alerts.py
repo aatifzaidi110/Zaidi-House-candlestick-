@@ -48,6 +48,8 @@ def log_spoofing_event(ticker, confidence):
 def render_big_money_watchlist():
     st.markdown("## 📈 Big Money Watchlist")
 
+    st.caption("\nℹ️ **Indicator Tooltips:**\n\n- **RSI < 30** = Oversold ✅  |  **RSI > 70** = Overbought ⚠\n- **MACD > 0** = Bullish ✅  |  **MACD < 0** = Bearish ⚠\n- **IV > 80** = Risky options ⚠  |  40-60 = Optimal ✅\n- **OI > 5000** = Institutional activity ✅\n- **BB Pos > 0.9** = Breakout zone ✅\n- **Price > EMA** = Uptrend ✅")
+
     data = [
         {
             "ticker": "NVDA",
@@ -60,10 +62,10 @@ def render_big_money_watchlist():
             "rsi": 45,
             "macd": 1.32,
             "ema_50": 126.87,
-            "iv": 42.1,
-            "oi": 155000,
-            "obv": 2.5,
-            "bb_pos": 0.87,
+            "iv": 42.3,
+            "oi": 8800,
+            "obv": 80000000,
+            "bb_pos": 0.92,
             "note": "Scalp opportunity",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -77,13 +79,13 @@ def render_big_money_watchlist():
             "reason": "Profit booking",
             "price": 256.12,
             "volume": 28900000,
-            "rsi": 71,
+            "rsi": 78,
             "macd": -0.56,
             "ema_50": 259.41,
-            "iv": 85.7,
-            "oi": 84000,
-            "obv": -1.8,
-            "bb_pos": 0.94,
+            "iv": 85.2,
+            "oi": 6100,
+            "obv": -12000000,
+            "bb_pos": 0.95,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
             "spoof_confidence": 0.83,
@@ -99,10 +101,10 @@ def render_big_money_watchlist():
             "rsi": 52,
             "macd": 0.12,
             "ema_50": 188.95,
-            "iv": 29.4,
-            "oi": 62000,
-            "obv": 0.9,
-            "bb_pos": 0.50,
+            "iv": 49.5,
+            "oi": 4200,
+            "obv": 1000000,
+            "bb_pos": 0.60,
             "note": "Neutral, monitor only",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -132,25 +134,20 @@ def render_big_money_watchlist():
         if row["spoofing"]:
             spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
             spoof_info += "\n⚠️ Note: Spoofing suspected, wait for confirmation"
-            spoof_info += "\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
+            spoof_info += "\n🗭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
             log_spoofing_event(row['ticker'], row['spoof_confidence'])
 
         indicators_used = (
-            f"🧪 Indicators (with thresholds):\n"
-            f"• RSI: {row['rsi']} (✔️ if <70, ⚠️ if >70)\n"
-            f"• MACD: {row['macd']} (✔️ if positive)\n"
-            f"• EMA-50: {row['ema_50']} (✔️ if price > EMA)\n"
-            f"• IV: {row['iv']}% (⚠️ if very high = expensive options)\n"
-            f"• OI: {row['oi']} (✔️ if high = participation)\n"
-            f"• OBV: {row['obv']} (✔️ if rising = confirmation)\n"
-            f"• BB Pos: {row['bb_pos']} (✔️ near 1 = breakout zone)"
+            f"🧪 Indicators:\n"
+            f"• RSI: {row['rsi']}  |  MACD: {row['macd']}  |  EMA-50: {row['ema_50']}\n"
+            f"• IV: {row['iv']}  |  OI: {row['oi']}  |  OBV: {row['obv']}  |  BB Pos: {row['bb_pos']}"
         )
 
         desc = (
             f"💬 Reason: {row['reason']}\n"
             f"💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n"
             f"📊 Indicator Confidence: {row['indicator_score'] * 100:.0f}%\n"
-            f"📝 Note: {row['note']}{spoof_info}\n"
+            f"📜 Note: {row['note']}{spoof_info}\n"
             f"{indicators_used}"
         )
 
