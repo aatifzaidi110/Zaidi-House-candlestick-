@@ -14,6 +14,8 @@ from signal_detector import detect_signal_type
 from news_blocker import should_block_trade
 from economic_calendar import should_block_macro_trades
 from backtest_analyzer import get_win_rate
+from thirteenf_parser import get_top_13f_investors
+from options_fetcher import fetch_option_trade_ideas
 
 try:
     import pandas_ta as ta
@@ -50,6 +52,7 @@ def render_strategy_center():
     st.header("🧠 Strategy Center — Big Money Activity")
 
     ticker = st.text_input("Ticker", value="ES=F")
+    ibp_pct = st.slider("Institutional Buy Price % below current price:", 90, 99, 96)
 
     price = None
     if ticker:
@@ -68,7 +71,8 @@ def render_strategy_center():
             st.error("Cannot analyze without valid price.")
         else:
             indicators = compute_indicators(ticker)
-            indicators["InstitutionalBuyPrice"] = price * 0.96
+            institutional_buy_price = round(price * (ibp_pct / 100), 2)
+            indicators["InstitutionalBuyPrice"] = institutional_buy_price
 
             blocked_earnings, msg1 = should_block_trade(ticker)
             blocked_macro, msg2 = should_block_macro_trades()
@@ -96,6 +100,18 @@ def render_strategy_center():
 
             win_rate = get_win_rate(detected_signal)
             st.info(f"📊 Historical Win Rate for {detected_signal}: {win_rate}%")
+
+            # === 13F Institutional Holdings ===
+            st.subheader("🏦 Recent Institutional Holdings")
+            top_investors = get_top_13f_investors(ticker)
+            for inv in top_investors:
+                st.write(f"👤 {inv['name']}: {inv['shares']} shares | ${inv['value']:,}")
+
+            # === Option Recommendations ===
+            st.subheader("📝 Option Trade Ideas")
+            option_ideas = fetch_option_trade_ideas(ticker)
+            for idea in option_ideas:
+                st.write(f"🔹 {idea['type']} {idea['strike']} @ {idea['expiry']} | Delta: {idea['delta']}, IV: {idea['iv']} | 🎯 Target: {idea['target']} | 🛑 Stop: {idea['stop']} | RR: {idea['rr']}")
 
             # === Historical Chart + Indicators ===
             if mpf_available:
