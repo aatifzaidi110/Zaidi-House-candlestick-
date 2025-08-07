@@ -3,7 +3,7 @@ streamlit
 yfinance
 pandas
 requests
-
+ta
 # === Optional / recommended for expansion ===
 matplotlib
 plotly
