@@ -1,5 +1,5 @@
 # === Core dependencies ===
-streamlit
+streamlit>=1.28
 yfinance
 pandas
 requests
@@ -19,6 +19,6 @@ pdfkit
 reportlab
 sec-edgar-downloader
 # Email/SMS Alerts
-smtplib
 email
 numpy
+rich
