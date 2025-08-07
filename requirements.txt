@@ -3,6 +3,7 @@ streamlit
 yfinance
 pandas
 requests
+ta
 pandas-ta
 mplfinance
 # === Optional / recommended for expansion ===
