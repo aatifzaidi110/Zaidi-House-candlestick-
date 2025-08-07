@@ -33,6 +33,19 @@ def detect_candlestick_patterns(df):
             patterns.append(col.replace("CDL_", ""))
     return patterns
 
+# === Mock Order Book Spoofing Detection ===
+def detect_spoofing_activity(df):
+    spoof_alerts = []
+    last_volume = df["Volume"].iloc[-1]
+    mean_volume = df["Volume"].mean()
+    if last_volume > 2 * mean_volume:
+        spoof_alerts.append({
+            "institution": "Unknown Large Entity",
+            "order_size": f"{int(last_volume)} shares",
+            "action": "Spoofing Alert: Large volume spike detected. Wait for confirmation."
+        })
+    return spoof_alerts
+
 def render_strategy_center():
     st.header("🧠 Strategy Center — Big Money Activity")
 
@@ -54,11 +67,9 @@ def render_strategy_center():
         if price is None:
             st.error("Cannot analyze without valid price.")
         else:
-            # === Fetch Indicators ===
             indicators = compute_indicators(ticker)
             indicators["InstitutionalBuyPrice"] = price * 0.96
 
-            # === Safety Filters ===
             blocked_earnings, msg1 = should_block_trade(ticker)
             blocked_macro, msg2 = should_block_macro_trades()
 
@@ -67,16 +78,13 @@ def render_strategy_center():
             if blocked_macro:
                 st.warning(msg2)
 
-            # === Detect Best Signal ===
             detected_signal, confidence = detect_signal_type(price, indicators)
-
             st.info(f"🧠 Auto-detected Signal: {detected_signal}  |  Confidence Score: {confidence}%")
 
             result = generate_strategy(detected_signal, ticker, price, indicators)
             st.success(f"Strategy: {result['strategy']}")
             st.write(f"📌 Why: {result['explanation']}")
 
-            # Volume threshold logic (mocked)
             volume_threshold = 1.5 * df_live["Volume"].mean()
             current_volume = df_live["Volume"].iloc[-1]
             next_step = result["next_step"]
@@ -118,7 +126,16 @@ def render_strategy_center():
             else:
                 st.warning("⚠️ `mplfinance` not installed. Skipping candlestick chart rendering.")
 
-            # Display active indicators used
+            # === Spoofing Alerts ===
+            st.subheader("🚨 Spoofing & Order Book Alerts")
+            spoofing_data = detect_spoofing_activity(df_live)
+            if spoofing_data:
+                for spoof in spoofing_data:
+                    st.error(f"⚠️ {spoof['action']}\n👤 {spoof['institution']} placed approx. {spoof['order_size']}")
+            else:
+                st.success("✅ No spoofing activity detected in recent data.")
+
+            # === Indicators Used ===
             st.markdown("---")
             st.subheader("📊 Indicators Used")
             for k, v in indicators.items():
