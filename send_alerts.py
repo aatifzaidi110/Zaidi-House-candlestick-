@@ -48,17 +48,6 @@ def log_spoofing_event(ticker, confidence):
 def render_big_money_watchlist():
     st.markdown("## 📈 Big Money Watchlist")
 
-    st.markdown("""
-    ### 🧪 Indicator Thresholds Explained:
-
-    - **RSI > 70** → 🔴 *Overbought*, possible reversal or pullback.
-    - **RSI < 30** → 🟢 *Oversold*, possible bounce if confirmed.
-    - **MACD Histogram > 0 & Rising** → ✅ *Bullish momentum*.
-    - **Price > EMA 9/20** → 📈 *Uptrend confirmation*.
-    - **OBV Rising with Price** → 💪 *Volume confirms move*.
-    - **Touching Bollinger Bands** → ⚠️ *Extreme zones*; may bounce or break.
-    """)
-
     data = [
         {
             "ticker": "NVDA",
@@ -71,6 +60,10 @@ def render_big_money_watchlist():
             "rsi": 45,
             "macd": 1.32,
             "ema_50": 126.87,
+            "obv": 321456000,
+            "bollinger_band": "Middle",
+            "iv": 35.2,
+            "oi": 220000,
             "note": "Scalp opportunity",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -87,6 +80,10 @@ def render_big_money_watchlist():
             "rsi": 61,
             "macd": -0.56,
             "ema_50": 259.41,
+            "obv": 274123000,
+            "bollinger_band": "Top",
+            "iv": 41.0,
+            "oi": 198000,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
             "spoof_confidence": 0.83,
@@ -102,6 +99,10 @@ def render_big_money_watchlist():
             "rsi": 52,
             "macd": 0.12,
             "ema_50": 188.95,
+            "obv": 298765000,
+            "bollinger_band": "Neutral",
+            "iv": 29.5,
+            "oi": 255000,
             "note": "Neutral, monitor only",
             "spoofing": False,
             "spoof_confidence": 0.0,
@@ -136,9 +137,13 @@ def render_big_money_watchlist():
 
         indicators_used = (
             f"🧪 Indicators:\n"
-            f"• RSI: {row['rsi']} (Above 70 = Overbought, Below 30 = Oversold)\n"
-            f"• MACD: {row['macd']} (Positive = Bullish)\n"
-            f"• EMA-50: {row['ema_50']} (Price above = Uptrend)"
+            f"• RSI: {row['rsi']} (✔️ ok if 40–60, ⚠️ caution if > 70)\n"
+            f"• MACD: {row['macd']} (✔️ positive = bullish)\n"
+            f"• EMA-50: {row['ema_50']} (✔️ price > EMA = strength)\n"
+            f"• OBV: {row['obv']:,} (volume momentum)\n"
+            f"• Bollinger Band: {row['bollinger_band']}\n"
+            f"• IV: {row['iv']}% (✔️ < 40%)\n"
+            f"• Open Interest: {row['oi']:,} (✔️ high = strong demand)"
         )
 
         desc = (
