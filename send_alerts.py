@@ -5,9 +5,9 @@ from email.message import EmailMessage
 
 def send_email_alert(ticker, message):
     try:
-        sender = "your_email@gmail.com"
+        sender = "aatif.zaidi110@gmail.com"
         password = "your_app_password"
-        recipient = "recipient_email@gmail.com"
+        recipient = "aatif.zaidi110@gmail.com"
 
         msg = EmailMessage()
         msg["Subject"] = f"📈 Alert for {ticker}"
@@ -25,3 +25,7 @@ def send_email_alert(ticker, message):
 def send_sms_alert(ticker, message):
     # Optional: Use Twilio or another API
     print(f"📲 SMS alert for {ticker}: {message}")
+
+if enable_institution_alerts and institution_value > 2_000_000:
+    send_email_alert(ticker, alert_message)
+
