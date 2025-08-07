@@ -38,6 +38,7 @@ def send_email_alert_with_condition(ticker, message, institution_value, enable_a
 # === Big Money Watchlist Tab ===
 def render_big_money_watchlist():
     import streamlit as st
+    import pandas as pd
 
     st.markdown("## 📈 Big Money Watchlist")
 
@@ -76,7 +77,16 @@ def render_big_money_watchlist():
         }
     ]
 
-    for row in data:
+    df = pd.DataFrame(data)
+
+    # Filter and sort UI
+    action_filter = st.multiselect("Filter by Action", options=["Buy", "Sell", "Hold"], default=["Buy", "Sell", "Hold"])
+    sort_option = st.selectbox("Sort by", options=["ticker", "price", "volume", "rsi"], index=0)
+    sort_asc = st.checkbox("Sort ascending", value=True)
+
+    filtered_df = df[df["action"].isin(action_filter)].sort_values(by=sort_option, ascending=sort_asc)
+
+    for _, row in filtered_df.iterrows():
         desc = f"💬 Reason: {row['reason']}\n💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n📝 Note: {row['note']}"
 
         if row["action"] == "Buy":
