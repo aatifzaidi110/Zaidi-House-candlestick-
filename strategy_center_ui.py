@@ -16,6 +16,7 @@ from economic_calendar import should_block_macro_trades
 from backtest_analyzer import get_win_rate
 from thirteenf_parser import get_top_13f_investors
 from options_fetcher import fetch_option_trade_ideas
+from send_alerts import send_email_alert, send_sms_alert
 
 try:
     import pandas_ta as ta
@@ -147,7 +148,10 @@ def render_strategy_center():
             spoofing_data = detect_spoofing_activity(df_live)
             if spoofing_data:
                 for spoof in spoofing_data:
-                    st.error(f"⚠️ {spoof['action']}\n👤 {spoof['institution']} placed approx. {spoof['order_size']}")
+                    alert_msg = f"⚠️ {spoof['action']}\n👤 {spoof['institution']} placed approx. {spoof['order_size']}"
+                    st.error(alert_msg)
+                    send_email_alert(ticker, alert_msg)
+                    send_sms_alert(ticker, alert_msg)
             else:
                 st.success("✅ No spoofing activity detected in recent data.")
 
