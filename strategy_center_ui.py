@@ -12,6 +12,12 @@ from economic_calendar import should_block_macro_trades
 from backtest_analyzer import get_win_rate
 import pandas_ta as ta
 
+try:
+    import mplfinance as mpf
+    mpf_available = True
+except ImportError:
+    mpf_available = False
+
 # === Candlestick Pattern Detection ===
 def detect_candlestick_patterns(df):
     patterns = []
