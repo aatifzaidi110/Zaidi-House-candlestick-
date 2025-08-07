@@ -60,7 +60,8 @@ def render_big_money_watchlist():
             "rsi": 45,
             "note": "Scalp opportunity",
             "spoofing": False,
-            "spoof_confidence": 0.0
+            "spoof_confidence": 0.0,
+            "indicator_score": 0.85
         },
         {
             "ticker": "TSLA",
@@ -73,7 +74,8 @@ def render_big_money_watchlist():
             "rsi": 61,
             "note": "Spoofing suspected, wait for confirmation",
             "spoofing": True,
-            "spoof_confidence": 0.83
+            "spoof_confidence": 0.83,
+            "indicator_score": 0.65
         },
         {
             "ticker": "AAPL",
@@ -85,7 +87,8 @@ def render_big_money_watchlist():
             "rsi": 52,
             "note": "Neutral, monitor only",
             "spoofing": False,
-            "spoof_confidence": 0.0
+            "spoof_confidence": 0.0,
+            "indicator_score": 0.55
         }
     ]
 
@@ -94,12 +97,14 @@ def render_big_money_watchlist():
     # Filter and sort UI
     action_filter = st.multiselect("Filter by Action", options=["Buy", "Sell", "Hold"], default=["Buy", "Sell", "Hold"])
     spoof_filter = st.checkbox("Only Show Spoofing Detected", value=False)
-    sort_option = st.selectbox("Sort by", options=["ticker", "price", "volume", "rsi", "spoof_confidence"], index=0)
+    confidence_threshold = st.slider("Minimum Indicator Confidence (%)", 0, 100, 70)
+    sort_option = st.selectbox("Sort by", options=["ticker", "price", "volume", "rsi", "spoof_confidence", "indicator_score"], index=0)
     sort_asc = st.checkbox("Sort ascending", value=True)
 
     filtered_df = df[df["action"].isin(action_filter)]
     if spoof_filter:
         filtered_df = filtered_df[filtered_df["spoofing"] == True]
+    filtered_df = filtered_df[filtered_df["indicator_score"] >= confidence_threshold / 100]
     filtered_df = filtered_df.sort_values(by=sort_option, ascending=sort_asc)
 
     for _, row in filtered_df.iterrows():
@@ -109,12 +114,13 @@ def render_big_money_watchlist():
         if row["spoofing"]:
             spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%"
             spoof_info += "\n⚠️ Note: Spoofing suspected, wait for confirmation"
-            spoof_info += f"\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
+            spoof_info += "\n🧭 Next Step: Monitor order book — confirm if volume drops after rapid price rise."
             log_spoofing_event(row['ticker'], row['spoof_confidence'])
 
         desc = (
             f"💬 Reason: {row['reason']}\n"
             f"💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n"
+            f"📊 Indicator Confidence: {row['indicator_score'] * 100:.0f}%\n"
             f"📝 Note: {row['note']}{spoof_info}"
         )
 
