@@ -1,0 +1,18 @@
+# === Core dependencies ===
+streamlit
+yfinance
+pandas
+requests
+
+# === Optional / recommended for expansion ===
+matplotlib
+plotly
+schedule
+beautifulsoup4
+lxml
+openpyxl
+email-validator
+python-dotenv
+pdfkit
+reportlab
+sec-edgar-downloader
