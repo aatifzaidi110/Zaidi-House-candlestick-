@@ -52,7 +52,9 @@ def render_big_money_watchlist():
             "price": 127.53,
             "volume": 32100000,
             "rsi": 45,
-            "note": "Scalp opportunity"
+            "note": "Scalp opportunity",
+            "spoofing": False,
+            "spoof_confidence": 0.0
         },
         {
             "ticker": "TSLA",
@@ -63,7 +65,9 @@ def render_big_money_watchlist():
             "price": 256.12,
             "volume": 28900000,
             "rsi": 61,
-            "note": "Spoofing suspected, wait for confirmation"
+            "note": "Spoofing suspected, wait for confirmation",
+            "spoofing": True,
+            "spoof_confidence": 0.83
         },
         {
             "ticker": "AAPL",
@@ -73,7 +77,9 @@ def render_big_money_watchlist():
             "price": 189.22,
             "volume": 35400000,
             "rsi": 52,
-            "note": "Neutral, monitor only"
+            "note": "Neutral, monitor only",
+            "spoofing": False,
+            "spoof_confidence": 0.0
         }
     ]
 
@@ -81,13 +87,18 @@ def render_big_money_watchlist():
 
     # Filter and sort UI
     action_filter = st.multiselect("Filter by Action", options=["Buy", "Sell", "Hold"], default=["Buy", "Sell", "Hold"])
-    sort_option = st.selectbox("Sort by", options=["ticker", "price", "volume", "rsi"], index=0)
+    spoof_filter = st.checkbox("Only Show Spoofing Detected", value=False)
+    sort_option = st.selectbox("Sort by", options=["ticker", "price", "volume", "rsi", "spoof_confidence"], index=0)
     sort_asc = st.checkbox("Sort ascending", value=True)
 
-    filtered_df = df[df["action"].isin(action_filter)].sort_values(by=sort_option, ascending=sort_asc)
+    filtered_df = df[df["action"].isin(action_filter)]
+    if spoof_filter:
+        filtered_df = filtered_df[filtered_df["spoofing"] == True]
+    filtered_df = filtered_df.sort_values(by=sort_option, ascending=sort_asc)
 
     for _, row in filtered_df.iterrows():
-        desc = f"💬 Reason: {row['reason']}\n💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n📝 Note: {row['note']}"
+        spoof_info = f"\n🔍 Spoofing Confidence: {row['spoof_confidence'] * 100:.0f}%" if row["spoofing"] else ""
+        desc = f"💬 Reason: {row['reason']}\n💲 Price: ${row['price']:.2f} | 📊 Volume: {row['volume']:,} | 📈 RSI: {row['rsi']}\n📝 Note: {row['note']}{spoof_info}"
 
         if row["action"] == "Buy":
             st.success(f"🟢 {row['ticker']} — {row['institution']} added ${row['value']:,}\n{desc}")
