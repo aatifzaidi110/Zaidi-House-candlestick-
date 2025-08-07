@@ -129,6 +129,43 @@ GLOSSARY_MARKDOWN = """
 - CORN/SOYB for agricultural trends spotted from COT or USDA alerts.
 - BITO is your retail-accessible path to Bitcoin futures movement.
 
+-------
+🔧 Suggested Additional Indicators to Add:
+1. Bollinger Bands
+Purpose: Detects volatility and overbought/oversold conditions.
+
+Usage: Price touching upper band → possible overbought; lower band → oversold.
+
+Why Add: Enhances confirmation of spoofing or breakout setups.
+
+2. MACD Histogram
+Purpose: Measures trend strength and momentum.
+
+Usage: Positive histogram rising = bullish momentum, and vice versa.
+
+Why Add: Helps confirm directional signals.
+
+3. Stochastic RSI
+Purpose: Adds sensitivity to RSI, great for scalping and short-term trades.
+
+Usage: < 20 = oversold; > 80 = overbought.
+
+Why Add: Can refine entries/exits in already-flagged spoof or momentum zones.
+
+4. ADX (Average Directional Index)
+Purpose: Measures trend strength (not direction).
+
+Usage: ADX > 25 → strong trend. Helps filter out choppy/noisy zones.
+
+Why Add: Prevents false trades in sideways/no trend environments.
+
+5. OBV (On Balance Volume)
+Purpose: Tracks volume flow to confirm price movement.
+
+Usage: Price up but OBV flat → divergence. Good for confirming spoofing moves.
+
+Why Add: Helps identify if big money is supporting a move or it's a fakeout.
+
 """
 
 def render_glossary_tab():
