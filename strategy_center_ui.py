@@ -86,8 +86,8 @@ def render_strategy_center():
 
             # === Historical Chart + Indicators ===
             # === Historical Chart + Indicators ===
-if mpf_available:
-    try:
+    if mpf_available:
+        try:
         df = yf.Ticker(ticker).history(period="5d", interval="15m")
         if not df.empty:
             df["EMA50"] = df["Close"].ewm(span=50).mean()
